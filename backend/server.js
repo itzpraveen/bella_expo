@@ -306,7 +306,7 @@ app.post('/api/coupons', authenticateToken, async (req, res) => {
   // Validate mobile number (Oman)
   const localMobile = normalizeOmanMobile(mobile_number);
   if (!isValidOmanMobile(localMobile)) {
-    return res.status(400).json({ error: 'Invalid Oman mobile number' });
+    return res.status(400).json({ error: 'Invalid Oman mobile number (8 digits, starts with 7 or 9)' });
   }
 
   const couponCode = generateCouponCode();

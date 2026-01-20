@@ -284,7 +284,7 @@ function EntryForm() {
     
     const localMobile = normalizeOmanMobile(formData.mobile_number);
     if (!isValidOmanMobile(localMobile)) {
-      toast.error('Please enter a valid 8-digit Oman mobile number');
+      toast.error('Please enter a valid 8-digit Oman mobile number (starts with 7 or 9)');
       return;
     }
     
@@ -379,7 +379,7 @@ function EntryForm() {
                 value={formData.mobile_number}
                 onChange={(e) => setFormData(prev => ({ ...prev, mobile_number: e.target.value }))}
                 className="w-full bg-white/70 border border-dark-700 rounded-xl py-3.5 pl-12 pr-4 text-dark-100 placeholder-dark-500 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all"
-                placeholder="8-digit Oman mobile number"
+                placeholder="8-digit Oman mobile (7/9xxxxxxx)"
                 inputMode="tel"
               />
             </div>
