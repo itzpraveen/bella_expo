@@ -42,9 +42,10 @@ const api = {
   
   async request(endpoint, options = {}) {
     const token = this.getToken();
+    const isLoginRequest = endpoint.startsWith('/api/auth/login');
     const headers = {
       'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
+      ...(!isLoginRequest && token && { Authorization: `Bearer ${token}` }),
       ...options.headers
     };
     
@@ -53,7 +54,7 @@ const api = {
       headers
     });
     
-    if (response.status === 401 || response.status === 403) {
+    if ((response.status === 401 || response.status === 403) && token && !isLoginRequest) {
       this.setToken(null);
       window.location.reload();
       throw new Error('Session expired');
