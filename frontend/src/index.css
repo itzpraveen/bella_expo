@@ -94,6 +94,12 @@ select {
   font-family: 'Plus Jakarta Sans', sans-serif !important;
 }
 
+/* Accessible focus treatment */
+.focus-ring:focus-visible {
+  outline: 3px solid rgba(237, 85, 69, 0.35);
+  outline-offset: 2px;
+}
+
 /* Loading dots animation */
 @keyframes loadingDots {
   0%, 20% { content: '.'; }

@@ -161,7 +161,7 @@ function LoginScreen() {
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full bg-white/70 border border-dark-700 rounded-xl py-3.5 pl-12 pr-4 text-dark-900 placeholder-dark-500 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all"
+                className="w-full bg-white/70 border border-dark-700 rounded-xl py-3.5 pl-12 pr-4 text-dark-100 placeholder-dark-500 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all"
                 placeholder="Enter username"
                 autoComplete="username"
               />
@@ -177,7 +177,7 @@ function LoginScreen() {
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-white/70 border border-dark-700 rounded-xl py-3.5 pl-12 pr-12 text-dark-900 placeholder-dark-500 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all"
+                className="w-full bg-white/70 border border-dark-700 rounded-xl py-3.5 pl-12 pr-12 text-dark-100 placeholder-dark-500 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all"
                 placeholder="Enter password"
                 autoComplete="current-password"
               />
@@ -363,7 +363,7 @@ function EntryForm() {
                 type="text"
                 value={formData.customer_name}
                 onChange={(e) => setFormData(prev => ({ ...prev, customer_name: e.target.value }))}
-                className="w-full bg-white/70 border border-dark-700 rounded-xl py-3.5 pl-12 pr-4 text-dark-900 placeholder-dark-500 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all"
+                className="w-full bg-white/70 border border-dark-700 rounded-xl py-3.5 pl-12 pr-4 text-dark-100 placeholder-dark-500 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all"
                 placeholder="Enter customer name"
               />
             </div>
@@ -378,7 +378,7 @@ function EntryForm() {
                 type="tel"
                 value={formData.mobile_number}
                 onChange={(e) => setFormData(prev => ({ ...prev, mobile_number: e.target.value }))}
-                className="w-full bg-white/70 border border-dark-700 rounded-xl py-3.5 pl-12 pr-4 text-dark-900 placeholder-dark-500 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all"
+                className="w-full bg-white/70 border border-dark-700 rounded-xl py-3.5 pl-12 pr-4 text-dark-100 placeholder-dark-500 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all"
                 placeholder="8-digit Oman mobile number"
                 inputMode="tel"
               />
@@ -393,7 +393,7 @@ function EntryForm() {
                 id="entry-branch"
                 value={formData.branch}
                 onChange={(e) => setFormData(prev => ({ ...prev, branch: e.target.value }))}
-                className="w-full bg-white/70 border border-dark-700 rounded-xl py-3.5 pl-12 pr-4 text-dark-900 appearance-none focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all"
+                className="w-full bg-white/70 border border-dark-700 rounded-xl py-3.5 pl-12 pr-4 text-dark-100 appearance-none focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all"
               >
                 {branches.map(branch => (
                   <option key={branch} value={branch}>{branch}</option>
@@ -716,13 +716,13 @@ function AdminDashboard() {
                     value={filters.search}
                     onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
                     placeholder="Search name, mobile, code..."
-                    className="w-full bg-white/70 border border-dark-700 rounded-lg py-2.5 pl-10 pr-4 text-dark-900 placeholder-dark-500 focus:outline-none focus:border-brand-500"
+                    className="w-full bg-white/70 border border-dark-700 rounded-lg py-2.5 pl-10 pr-4 text-dark-100 placeholder-dark-500 focus:outline-none focus:border-brand-500"
                   />
                 </div>
                 <select
                   value={filters.branch}
                   onChange={(e) => setFilters(prev => ({ ...prev, branch: e.target.value }))}
-                  className="bg-white/70 border border-dark-700 rounded-lg py-2.5 px-4 text-dark-900 focus:outline-none focus:border-brand-500"
+                  className="bg-white/70 border border-dark-700 rounded-lg py-2.5 px-4 text-dark-100 focus:outline-none focus:border-brand-500"
                 >
                   <option value="">All Branches</option>
                   {branches.map(b => <option key={b} value={b}>{b}</option>)}
@@ -731,7 +731,7 @@ function AdminDashboard() {
                   type="date"
                   value={filters.date}
                   onChange={(e) => setFilters(prev => ({ ...prev, date: e.target.value }))}
-                  className="bg-white/70 border border-dark-700 rounded-lg py-2.5 px-4 text-dark-900 focus:outline-none focus:border-brand-500"
+                  className="bg-white/70 border border-dark-700 rounded-lg py-2.5 px-4 text-dark-100 focus:outline-none focus:border-brand-500"
                 />
               </div>
 
@@ -985,7 +985,7 @@ function StaffManagement({ staff, onRefresh }) {
                   type="text"
                   value={newStaff.name}
                   onChange={(e) => setNewStaff(prev => ({ ...prev, name: e.target.value }))}
-                  className="w-full mt-1 bg-white/70 border border-dark-700 rounded-xl py-3 px-4 text-dark-900 focus:outline-none focus:border-brand-500"
+                  className="w-full mt-1 bg-white/70 border border-dark-700 rounded-xl py-3 px-4 text-dark-100 focus:outline-none focus:border-brand-500"
                   placeholder="John Doe"
                 />
               </div>
@@ -996,7 +996,7 @@ function StaffManagement({ staff, onRefresh }) {
                   type="text"
                   value={newStaff.username}
                   onChange={(e) => setNewStaff(prev => ({ ...prev, username: e.target.value.toLowerCase() }))}
-                  className="w-full mt-1 bg-white/70 border border-dark-700 rounded-xl py-3 px-4 text-dark-900 focus:outline-none focus:border-brand-500"
+                  className="w-full mt-1 bg-white/70 border border-dark-700 rounded-xl py-3 px-4 text-dark-100 focus:outline-none focus:border-brand-500"
                   placeholder="johndoe"
                 />
               </div>
@@ -1007,7 +1007,7 @@ function StaffManagement({ staff, onRefresh }) {
                   type="text"
                   value={newStaff.password}
                   onChange={(e) => setNewStaff(prev => ({ ...prev, password: e.target.value }))}
-                  className="w-full mt-1 bg-white/70 border border-dark-700 rounded-xl py-3 px-4 text-dark-900 focus:outline-none focus:border-brand-500"
+                  className="w-full mt-1 bg-white/70 border border-dark-700 rounded-xl py-3 px-4 text-dark-100 focus:outline-none focus:border-brand-500"
                   placeholder="Minimum 4 characters"
                 />
               </div>
@@ -1017,7 +1017,7 @@ function StaffManagement({ staff, onRefresh }) {
                   id="staff-role"
                   value={newStaff.role}
                   onChange={(e) => setNewStaff(prev => ({ ...prev, role: e.target.value }))}
-                  className="w-full mt-1 bg-white/70 border border-dark-700 rounded-xl py-3 px-4 text-dark-900 focus:outline-none focus:border-brand-500"
+                  className="w-full mt-1 bg-white/70 border border-dark-700 rounded-xl py-3 px-4 text-dark-100 focus:outline-none focus:border-brand-500"
                 >
                   <option value="staff">Staff</option>
                   <option value="admin">Admin</option>
