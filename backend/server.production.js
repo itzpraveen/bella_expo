@@ -21,7 +21,11 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ============== DATABASE SETUP ==============
-const dbPath = process.env.DATABASE_PATH || './data/coupon.db';
+const dbPath = process.env.DATABASE_PATH || (
+  process.env.RAILWAY_VOLUME_MOUNT_PATH
+    ? path.join(process.env.RAILWAY_VOLUME_MOUNT_PATH, 'coupon.db')
+    : './data/coupon.db'
+);
 const dbDir = path.dirname(dbPath);
 if (!fs.existsSync(dbDir)) {
   fs.mkdirSync(dbDir, { recursive: true });
