@@ -212,6 +212,31 @@ app.get('/api/auth/me', authenticateToken, (req, res) => {
   res.json({ user: req.user });
 });
 
+app.patch('/api/auth/password', authenticateToken, (req, res) => {
+  const { current_password, new_password } = req.body;
+
+  if (!current_password || !new_password) {
+    return res.status(400).json({ error: 'Current and new password required' });
+  }
+
+  if (new_password.length < 4) {
+    return res.status(400).json({ error: 'Password must be at least 4 characters' });
+  }
+
+  const user = db.prepare('SELECT id, password, active FROM users WHERE id = ?').get(req.user.id);
+  if (!user || !user.active) {
+    return res.status(403).json({ error: 'Account inactive' });
+  }
+
+  if (!bcrypt.compareSync(current_password, user.password)) {
+    return res.status(400).json({ error: 'Current password incorrect' });
+  }
+
+  const hashedPassword = bcrypt.hashSync(new_password, 10);
+  db.prepare('UPDATE users SET password = ? WHERE id = ?').run(hashedPassword, req.user.id);
+  res.json({ message: 'Password updated successfully' });
+});
+
 // ============== STAFF ROUTES ==============
 
 // Get all staff (admin only)

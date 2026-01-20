@@ -4,7 +4,7 @@ import {
   Ticket, LogOut, Users, BarChart3, Download, RefreshCw, 
   Search, ChevronRight, Menu, X, Check, AlertCircle,
   Smartphone, User, Building, Send, Eye, EyeOff, Plus,
-  Calendar, Filter, ArrowLeft, Settings, Lock, ToggleLeft, ToggleRight
+  Lock, ToggleLeft, ToggleRight
 } from 'lucide-react';
 import bellaLogo from './assets/bella_logo.webp';
 
@@ -226,6 +226,7 @@ function EntryForm() {
   const [loading, setLoading] = useState(false);
   const [lastCoupon, setLastCoupon] = useState(null);
   const [stats, setStats] = useState({ today: 0, total: 0 });
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
   const normalizeOmanMobile = (value) => {
     let cleaned = value.replace(/\D/g, '');
 
@@ -326,13 +327,22 @@ function EntryForm() {
             <p className="text-xs text-dark-400">Hi, {user.name}</p>
           </div>
         </div>
-        <button
-          onClick={logout}
-          className="p-2 rounded-lg hover:bg-dark-800 transition-colors focus-ring"
-          aria-label="Log out"
-        >
-          <LogOut className="w-5 h-5 text-dark-400" />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowPasswordModal(true)}
+            className="p-2 rounded-lg hover:bg-dark-800 transition-colors focus-ring"
+            aria-label="Change password"
+          >
+            <Lock className="w-5 h-5 text-dark-400" />
+          </button>
+          <button
+            onClick={logout}
+            className="p-2 rounded-lg hover:bg-dark-800 transition-colors focus-ring"
+            aria-label="Log out"
+          >
+            <LogOut className="w-5 h-5 text-dark-400" />
+          </button>
+        </div>
       </header>
 
       <main className="p-4 max-w-lg mx-auto space-y-4 animate-fade-in">
@@ -449,6 +459,10 @@ function EntryForm() {
           </div>
         )}
       </main>
+      <ChangePasswordModal
+        isOpen={showPasswordModal}
+        onClose={() => setShowPasswordModal(false)}
+      />
     </div>
   );
 }
@@ -464,6 +478,7 @@ function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({ search: '', branch: '', date: '' });
   const [branches, setBranches] = useState([]);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -607,7 +622,15 @@ function AdminDashboard() {
           ))}
         </nav>
 
-        <div className="absolute bottom-4 left-4 right-4">
+        <div className="absolute bottom-4 left-4 right-4 space-y-2">
+          <button
+            onClick={() => setShowPasswordModal(true)}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-dark-300 hover:bg-dark-800 transition-all focus-ring"
+            aria-label="Change password"
+          >
+            <Lock className="w-5 h-5" />
+            Change Password
+          </button>
           <button
             onClick={logout}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-dark-400 hover:bg-dark-800 transition-all focus-ring"
@@ -815,19 +838,17 @@ function AdminDashboard() {
           )}
         </main>
       </div>
+      <ChangePasswordModal
+        isOpen={showPasswordModal}
+        onClose={() => setShowPasswordModal(false)}
+      />
     </div>
   );
 }
 
-// Staff Management Component
-function StaffManagement({ staff, onRefresh }) {
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [newStaff, setNewStaff] = useState({ username: '', password: '', name: '', role: 'staff' });
-  const [loading, setLoading] = useState(false);
-  const modalRef = useRef(null);
-
+function useModalFocusTrap(isOpen, modalRef, onClose) {
   useEffect(() => {
-    if (!showAddModal) return;
+    if (!isOpen) return;
     const previousFocus = document.activeElement;
     const modal = modalRef.current;
     if (!modal) return;
@@ -841,7 +862,7 @@ function StaffManagement({ staff, onRefresh }) {
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
         event.preventDefault();
-        setShowAddModal(false);
+        onClose();
         return;
       }
 
@@ -867,7 +888,161 @@ function StaffManagement({ staff, onRefresh }) {
         previousFocus.focus();
       }
     };
-  }, [showAddModal]);
+  }, [isOpen, modalRef, onClose]);
+}
+
+function ChangePasswordModal({ isOpen, onClose }) {
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const modalRef = useRef(null);
+
+  const handleClose = () => {
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
+    setLoading(false);
+    onClose();
+  };
+
+  useModalFocusTrap(isOpen, modalRef, handleClose);
+
+  if (!isOpen) return null;
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!currentPassword || !newPassword) {
+      toast.error('Please fill all fields');
+      return;
+    }
+
+    if (newPassword.length < 4) {
+      toast.error('Password must be at least 4 characters');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await api.patch('/api/auth/password', {
+        current_password: currentPassword,
+        new_password: newPassword
+      });
+      toast.success('Password updated');
+      handleClose();
+    } catch (error) {
+      toast.error(error.message || 'Failed to update password');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+      <div
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="change-password-title"
+        className="glass rounded-2xl p-6 w-full max-w-md animate-bounce-in"
+      >
+        <div className="flex items-center justify-between mb-6">
+          <h3 id="change-password-title" className="font-display text-xl font-bold">Change Password</h3>
+          <button
+            onClick={handleClose}
+            className="p-2 hover:bg-dark-700 rounded-lg focus-ring"
+            aria-label="Close change password dialog"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="current-password" className="text-sm font-medium text-dark-300">Current Password</label>
+            <input
+              id="current-password"
+              type="password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              className="w-full mt-1 bg-white/70 border border-dark-700 rounded-xl py-3 px-4 text-dark-100 focus:outline-none focus:border-brand-500"
+              autoComplete="current-password"
+              placeholder="Enter current password"
+            />
+          </div>
+          <div>
+            <label htmlFor="new-password" className="text-sm font-medium text-dark-300">New Password</label>
+            <input
+              id="new-password"
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="w-full mt-1 bg-white/70 border border-dark-700 rounded-xl py-3 px-4 text-dark-100 focus:outline-none focus:border-brand-500"
+              autoComplete="new-password"
+              placeholder="Minimum 4 characters"
+            />
+          </div>
+          <div>
+            <label htmlFor="confirm-password" className="text-sm font-medium text-dark-300">Confirm New Password</label>
+            <input
+              id="confirm-password"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="w-full mt-1 bg-white/70 border border-dark-700 rounded-xl py-3 px-4 text-dark-100 focus:outline-none focus:border-brand-500"
+              autoComplete="new-password"
+              placeholder="Re-enter new password"
+            />
+          </div>
+
+          <div className="flex gap-3 pt-4">
+            <button
+              type="button"
+              onClick={handleClose}
+              className="flex-1 py-3 rounded-xl border border-dark-600 hover:bg-dark-800 transition-colors focus-ring"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 py-3 rounded-xl bg-brand-600 hover:bg-brand-700 transition-colors disabled:opacity-50 focus-ring"
+            >
+              {loading ? 'Updating...' : 'Update Password'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// Staff Management Component
+function StaffManagement({ staff, onRefresh }) {
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [newStaff, setNewStaff] = useState({ username: '', password: '', name: '', role: 'staff' });
+  const [resetTarget, setResetTarget] = useState(null);
+  const [resetPassword, setResetPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
+  const addModalRef = useRef(null);
+  const resetModalRef = useRef(null);
+
+  const closeResetModal = () => {
+    setShowResetModal(false);
+    setResetTarget(null);
+    setResetPassword('');
+  };
+
+  useModalFocusTrap(showAddModal, addModalRef, () => setShowAddModal(false));
+  useModalFocusTrap(showResetModal, resetModalRef, closeResetModal);
 
   const handleAddStaff = async (e) => {
     e.preventDefault();
@@ -897,6 +1072,31 @@ function StaffManagement({ staff, onRefresh }) {
       onRefresh();
     } catch (error) {
       toast.error(error.message || 'Failed to update status');
+    }
+  };
+
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    if (!resetPassword || resetPassword.length < 4) {
+      toast.error('Password must be at least 4 characters');
+      return;
+    }
+
+    if (!resetTarget) {
+      toast.error('Select a staff member');
+      return;
+    }
+
+    setResetLoading(true);
+    try {
+      await api.patch(`/api/staff/${resetTarget.id}/password`, { password: resetPassword });
+      toast.success('Password updated');
+      closeResetModal();
+      onRefresh();
+    } catch (error) {
+      toast.error(error.message || 'Failed to update password');
+    } finally {
+      setResetLoading(false);
     }
   };
 
@@ -936,22 +1136,36 @@ function StaffManagement({ staff, onRefresh }) {
               </span>
             </div>
             
-            <div className="mt-4 pt-4 border-t border-dark-700 flex items-center justify-between">
+            <div className="mt-4 pt-4 border-t border-dark-700 flex items-center justify-between gap-3">
               <span className={`text-sm ${member.active ? 'text-emerald-700' : 'text-red-600'}`}>
                 {member.active ? 'Active' : 'Inactive'}
               </span>
-              <button
-                onClick={() => handleToggleStatus(member.id)}
-                className="p-2 hover:bg-dark-700 rounded-lg transition-colors focus-ring"
-                aria-label={`Set ${member.name} ${member.active ? 'inactive' : 'active'}`}
-                aria-pressed={member.active}
-              >
-                {member.active ? (
-                  <ToggleRight className="w-6 h-6 text-emerald-600" />
-                ) : (
-                  <ToggleLeft className="w-6 h-6 text-dark-500" />
-                )}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    setResetTarget(member);
+                    setResetPassword('');
+                    setShowResetModal(true);
+                  }}
+                  className="flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg border border-dark-700 hover:bg-dark-800 transition-colors focus-ring"
+                  aria-label={`Reset password for ${member.name}`}
+                >
+                  <Lock className="w-4 h-4" />
+                  Reset Password
+                </button>
+                <button
+                  onClick={() => handleToggleStatus(member.id)}
+                  className="p-2 hover:bg-dark-700 rounded-lg transition-colors focus-ring"
+                  aria-label={`Set ${member.name} ${member.active ? 'inactive' : 'active'}`}
+                  aria-pressed={member.active}
+                >
+                  {member.active ? (
+                    <ToggleRight className="w-6 h-6 text-emerald-600" />
+                  ) : (
+                    <ToggleLeft className="w-6 h-6 text-dark-500" />
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         ))}
@@ -961,7 +1175,7 @@ function StaffManagement({ staff, onRefresh }) {
       {showAddModal && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
           <div
-            ref={modalRef}
+            ref={addModalRef}
             role="dialog"
             aria-modal="true"
             aria-labelledby="add-staff-title"
@@ -1039,6 +1253,65 @@ function StaffManagement({ staff, onRefresh }) {
                   className="flex-1 py-3 rounded-xl bg-brand-600 hover:bg-brand-700 transition-colors disabled:opacity-50 focus-ring"
                 >
                   {loading ? 'Adding...' : 'Add Staff'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showResetModal && resetTarget && (
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+          <div
+            ref={resetModalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="reset-password-title"
+            className="glass rounded-2xl p-6 w-full max-w-md animate-bounce-in"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h3 id="reset-password-title" className="font-display text-xl font-bold">Reset Password</h3>
+              <button
+                onClick={closeResetModal}
+                className="p-2 hover:bg-dark-700 rounded-lg focus-ring"
+                aria-label="Close reset password dialog"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleResetPassword} className="space-y-4">
+              <div className="rounded-xl border border-dark-700 bg-white/70 p-4">
+                <p className="text-sm text-dark-400">Resetting password for</p>
+                <p className="font-semibold">{resetTarget.name}</p>
+                <p className="text-sm text-dark-400">@{resetTarget.username}</p>
+              </div>
+              <div>
+                <label htmlFor="reset-password" className="text-sm font-medium text-dark-300">New Password</label>
+                <input
+                  id="reset-password"
+                  type="text"
+                  value={resetPassword}
+                  onChange={(e) => setResetPassword(e.target.value)}
+                  className="w-full mt-1 bg-white/70 border border-dark-700 rounded-xl py-3 px-4 text-dark-100 focus:outline-none focus:border-brand-500"
+                  placeholder="Minimum 4 characters"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={closeResetModal}
+                  className="flex-1 py-3 rounded-xl border border-dark-600 hover:bg-dark-800 transition-colors focus-ring"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={resetLoading}
+                  className="flex-1 py-3 rounded-xl bg-brand-600 hover:bg-brand-700 transition-colors disabled:opacity-50 focus-ring"
+                >
+                  {resetLoading ? 'Updating...' : 'Update Password'}
                 </button>
               </div>
             </form>

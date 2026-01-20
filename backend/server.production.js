@@ -178,6 +178,31 @@ app.get('/api/auth/me', authenticateToken, (req, res) => {
   res.json({ user: req.user });
 });
 
+app.patch('/api/auth/password', authenticateToken, (req, res) => {
+  const { current_password, new_password } = req.body;
+
+  if (!current_password || !new_password) {
+    return res.status(400).json({ error: 'Current and new password required' });
+  }
+
+  if (new_password.length < 4) {
+    return res.status(400).json({ error: 'Password must be at least 4 characters' });
+  }
+
+  const user = db.prepare('SELECT id, password, active FROM users WHERE id = ?').get(req.user.id);
+  if (!user || !user.active) {
+    return res.status(403).json({ error: 'Account inactive' });
+  }
+
+  if (!bcrypt.compareSync(current_password, user.password)) {
+    return res.status(400).json({ error: 'Current password incorrect' });
+  }
+
+  const hashedPassword = bcrypt.hashSync(new_password, 10);
+  db.prepare('UPDATE users SET password = ? WHERE id = ?').run(hashedPassword, req.user.id);
+  res.json({ message: 'Password updated successfully' });
+});
+
 // Branches
 app.get('/api/branches', authenticateToken, (req, res) => {
   const branches = process.env.BRANCHES?.split(',').map(b => b.trim()) || 
@@ -314,6 +339,20 @@ app.patch('/api/staff/:id/toggle', authenticateToken, requireAdmin, (req, res) =
   
   db.prepare('UPDATE users SET active = ? WHERE id = ?').run(user.active ? 0 : 1, req.params.id);
   res.json({ active: !user.active });
+});
+
+app.patch('/api/staff/:id/password', authenticateToken, requireAdmin, (req, res) => {
+  const { password } = req.body;
+  if (!password || password.length < 4) {
+    return res.status(400).json({ error: 'Password must be at least 4 characters' });
+  }
+
+  const user = db.prepare('SELECT id FROM users WHERE id = ?').get(req.params.id);
+  if (!user) return res.status(404).json({ error: 'Staff not found' });
+
+  const hashedPassword = bcrypt.hashSync(password, 10);
+  db.prepare('UPDATE users SET password = ? WHERE id = ?').run(hashedPassword, req.params.id);
+  res.json({ message: 'Password updated successfully' });
 });
 
 // Health check
