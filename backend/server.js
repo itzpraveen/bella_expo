@@ -124,22 +124,30 @@ const generateCouponCode = () => {
   return `${prefix}-${timestamp}-${random}`;
 };
 
-// Format phone number for WhatsApp (India)
-const formatPhoneNumber = (phone) => {
-  // Remove all non-digits
+// Format phone number for WhatsApp (Oman)
+const normalizeOmanMobile = (phone) => {
   let cleaned = phone.replace(/\D/g, '');
-  
-  // If starts with 0, remove it
+
+  if (cleaned.startsWith('00')) {
+    cleaned = cleaned.substring(2);
+  }
+
+  if (cleaned.startsWith('968')) {
+    cleaned = cleaned.substring(3);
+  }
+
   if (cleaned.startsWith('0')) {
     cleaned = cleaned.substring(1);
   }
-  
-  // If doesn't start with 91, add it
-  if (!cleaned.startsWith('91')) {
-    cleaned = '91' + cleaned;
-  }
-  
+
   return cleaned;
+};
+
+const isValidOmanMobile = (localNumber) => /^[79]\d{7}$/.test(localNumber);
+
+const formatPhoneNumber = (phone) => {
+  const local = normalizeOmanMobile(phone);
+  return `968${local}`;
 };
 
 // Send WhatsApp message via Twilio
@@ -295,10 +303,10 @@ app.post('/api/coupons', authenticateToken, async (req, res) => {
     return res.status(400).json({ error: 'Customer name, mobile number, and branch required' });
   }
 
-  // Validate mobile number (10 digits for India)
-  const cleanedMobile = mobile_number.replace(/\D/g, '');
-  if (cleanedMobile.length < 10) {
-    return res.status(400).json({ error: 'Invalid mobile number' });
+  // Validate mobile number (Oman)
+  const localMobile = normalizeOmanMobile(mobile_number);
+  if (!isValidOmanMobile(localMobile)) {
+    return res.status(400).json({ error: 'Invalid Oman mobile number' });
   }
 
   const couponCode = generateCouponCode();

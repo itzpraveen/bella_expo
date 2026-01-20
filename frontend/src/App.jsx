@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createContext, useContext } from 'react';
+import React, { useState, useEffect, useRef, createContext, useContext } from 'react';
 import { Toaster, toast } from 'react-hot-toast';
 import { 
   Ticket, LogOut, Users, BarChart3, Download, RefreshCw, 
@@ -153,10 +153,11 @@ function LoginScreen() {
         {/* Login Form */}
         <form onSubmit={handleSubmit} className="glass rounded-2xl p-6 space-y-5">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-dark-300">Username</label>
+            <label htmlFor="login-username" className="text-sm font-medium text-dark-300">Username</label>
             <div className="relative">
               <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-500" />
               <input
+                id="login-username"
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
@@ -168,10 +169,11 @@ function LoginScreen() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-dark-300">Password</label>
+            <label htmlFor="login-password" className="text-sm font-medium text-dark-300">Password</label>
             <div className="relative">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-500" />
               <input
+                id="login-password"
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -182,7 +184,9 @@ function LoginScreen() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-dark-500 hover:text-dark-300"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-dark-500 hover:text-dark-300 focus-ring rounded-full"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                aria-pressed={showPassword}
               >
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
@@ -192,7 +196,7 @@ function LoginScreen() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white font-semibold py-3.5 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ripple shadow-lg shadow-brand-500/25"
+            className="w-full bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white font-semibold py-3.5 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ripple shadow-lg shadow-brand-500/25 focus-ring"
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
@@ -221,6 +225,24 @@ function EntryForm() {
   const [loading, setLoading] = useState(false);
   const [lastCoupon, setLastCoupon] = useState(null);
   const [stats, setStats] = useState({ today: 0, total: 0 });
+  const normalizeOmanMobile = (value) => {
+    let cleaned = value.replace(/\D/g, '');
+
+    if (cleaned.startsWith('00')) {
+      cleaned = cleaned.substring(2);
+    }
+
+    if (cleaned.startsWith('968')) {
+      cleaned = cleaned.substring(3);
+    }
+
+    if (cleaned.startsWith('0')) {
+      cleaned = cleaned.substring(1);
+    }
+
+    return cleaned;
+  };
+  const isValidOmanMobile = (localNumber) => /^[79]\d{7}$/.test(localNumber);
 
   useEffect(() => {
     loadBranches();
@@ -260,9 +282,9 @@ function EntryForm() {
       return;
     }
     
-    const cleanedMobile = formData.mobile_number.replace(/\D/g, '');
-    if (cleanedMobile.length < 10) {
-      toast.error('Please enter a valid 10-digit mobile number');
+    const localMobile = normalizeOmanMobile(formData.mobile_number);
+    if (!isValidOmanMobile(localMobile)) {
+      toast.error('Please enter a valid 8-digit Oman mobile number');
       return;
     }
     
@@ -305,7 +327,8 @@ function EntryForm() {
         </div>
         <button
           onClick={logout}
-          className="p-2 rounded-lg hover:bg-dark-800 transition-colors"
+          className="p-2 rounded-lg hover:bg-dark-800 transition-colors focus-ring"
+          aria-label="Log out"
         >
           <LogOut className="w-5 h-5 text-dark-400" />
         </button>
@@ -320,7 +343,7 @@ function EntryForm() {
           </div>
           <div className="glass rounded-xl p-4">
             <p className="text-dark-400 text-sm">Total</p>
-            <p className="font-display text-2xl font-bold text-dark-900">{stats.total}</p>
+            <p className="font-display text-2xl font-bold text-dark-200">{stats.total}</p>
           </div>
         </div>
 
@@ -332,10 +355,11 @@ function EntryForm() {
           </h2>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-dark-300">Customer Name</label>
+            <label htmlFor="entry-customer-name" className="text-sm font-medium text-dark-300">Customer Name</label>
             <div className="relative">
               <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-500" />
               <input
+                id="entry-customer-name"
                 type="text"
                 value={formData.customer_name}
                 onChange={(e) => setFormData(prev => ({ ...prev, customer_name: e.target.value }))}
@@ -346,25 +370,27 @@ function EntryForm() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-dark-300">Mobile Number</label>
+            <label htmlFor="entry-mobile-number" className="text-sm font-medium text-dark-300">Mobile Number</label>
             <div className="relative">
               <Smartphone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-500" />
               <input
+                id="entry-mobile-number"
                 type="tel"
                 value={formData.mobile_number}
                 onChange={(e) => setFormData(prev => ({ ...prev, mobile_number: e.target.value }))}
                 className="w-full bg-white/70 border border-dark-700 rounded-xl py-3.5 pl-12 pr-4 text-dark-900 placeholder-dark-500 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all"
-                placeholder="10-digit mobile number"
+                placeholder="8-digit Oman mobile number"
                 inputMode="tel"
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-dark-300">Branch</label>
+            <label htmlFor="entry-branch" className="text-sm font-medium text-dark-300">Branch</label>
             <div className="relative">
               <Building className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-500" />
               <select
+                id="entry-branch"
                 value={formData.branch}
                 onChange={(e) => setFormData(prev => ({ ...prev, branch: e.target.value }))}
                 className="w-full bg-white/70 border border-dark-700 rounded-xl py-3.5 pl-12 pr-4 text-dark-900 appearance-none focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all"
@@ -380,7 +406,7 @@ function EntryForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white font-semibold py-4 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ripple shadow-lg shadow-brand-500/25 flex items-center justify-center gap-2"
+            className="w-full bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-600 hover:to-brand-700 text-white font-semibold py-4 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ripple shadow-lg shadow-brand-500/25 flex items-center justify-center gap-2 focus-ring"
           >
             {loading ? (
               <>
@@ -407,9 +433,9 @@ function EntryForm() {
                 <p className="font-semibold text-green-700">Coupon Created!</p>
                 <p className="text-sm text-dark-300 mt-1">{lastCoupon.customer_name}</p>
                 <p className="text-sm text-dark-400">{lastCoupon.mobile_number}</p>
-                <div className="mt-2 px-3 py-2 bg-dark-900/50 rounded-lg">
+                <div className="mt-2 px-3 py-2 bg-white/70 border border-dark-700 rounded-lg">
                   <p className="text-xs text-dark-400">Coupon Code</p>
-                  <p className="font-mono font-bold text-brand-400">{lastCoupon.coupon_code}</p>
+                  <p className="font-mono font-bold text-brand-500">{lastCoupon.coupon_code}</p>
                 </div>
                 {!lastCoupon.whatsapp_sent && (
                   <p className="text-xs text-amber-700 mt-2 flex items-center gap-1">
@@ -546,11 +572,11 @@ function AdminDashboard() {
     <div className="min-h-screen pattern-bg">
       {/* Mobile Menu Overlay */}
       {menuOpen && (
-        <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setMenuOpen(false)} />
+        <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={() => setMenuOpen(false)} />
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 w-64 glass z-50 transform transition-transform duration-300 lg:translate-x-0 ${menuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <aside className={`fixed inset-y-0 left-0 w-64 glass z-50 transform transition-transform duration-300 md:translate-x-0 ${menuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="p-4 border-b border-dark-700">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-brand-50 border border-brand-100 flex items-center justify-center shadow-sm">
@@ -568,7 +594,7 @@ function AdminDashboard() {
             <button
               key={item.id}
               onClick={() => { setActiveTab(item.id); setMenuOpen(false); }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all focus-ring ${
                 activeTab === item.id 
                   ? 'bg-brand-500/20 text-brand-400' 
                   : 'text-dark-300 hover:bg-dark-800'
@@ -583,7 +609,8 @@ function AdminDashboard() {
         <div className="absolute bottom-4 left-4 right-4">
           <button
             onClick={logout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-dark-400 hover:bg-dark-800 transition-all"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-dark-400 hover:bg-dark-800 transition-all focus-ring"
+            aria-label="Log out"
           >
             <LogOut className="w-5 h-5" />
             Logout
@@ -592,23 +619,28 @@ function AdminDashboard() {
       </aside>
 
       {/* Main Content */}
-      <div className="lg:pl-64">
+      <div className="md:pl-64">
         {/* Mobile Header */}
-        <header className="glass sticky top-0 z-30 px-4 py-3 flex items-center justify-between lg:hidden">
-          <button onClick={() => setMenuOpen(true)} className="p-2 rounded-lg hover:bg-dark-800">
+        <header className="glass sticky top-0 z-30 px-4 py-3 flex items-center justify-between md:hidden">
+          <button
+            onClick={() => setMenuOpen(true)}
+            className="p-2 rounded-lg hover:bg-dark-800 focus-ring"
+            aria-label="Open menu"
+            aria-expanded={menuOpen}
+          >
             <Menu className="w-6 h-6" />
           </button>
           <h1 className="font-display font-bold">{menuItems.find(m => m.id === activeTab)?.label}</h1>
           <div className="w-10" />
         </header>
 
-        <main className="p-4 lg:p-6 animate-fade-in">
+        <main className="p-4 md:p-6 animate-fade-in">
           {/* Dashboard Tab */}
           {activeTab === 'dashboard' && stats && (
             <div className="space-y-6">
-              <h2 className="font-display text-2xl font-bold hidden lg:block">Dashboard</h2>
+              <h2 className="font-display text-2xl font-bold hidden md:block">Dashboard</h2>
               
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 <div className="glass rounded-xl p-5">
                   <p className="text-dark-400 text-sm">Total Coupons</p>
                   <p className="font-display text-3xl font-bold gradient-text mt-1">{stats.totalCoupons}</p>
@@ -627,7 +659,7 @@ function AdminDashboard() {
                 </div>
               </div>
 
-              <div className="grid lg:grid-cols-2 gap-6">
+              <div className="grid md:grid-cols-2 gap-6">
                 <div className="glass rounded-xl p-5">
                   <h3 className="font-display font-semibold mb-4">By Branch</h3>
                   <div className="space-y-3">
@@ -664,11 +696,11 @@ function AdminDashboard() {
           {/* Coupons Tab */}
           {activeTab === 'coupons' && (
             <div className="space-y-4">
-              <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
-                <h2 className="font-display text-2xl font-bold hidden lg:block">Coupons</h2>
+              <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+                <h2 className="font-display text-2xl font-bold hidden md:block">Coupons</h2>
                 <button
                   onClick={handleExport}
-                  className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-xl transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-xl transition-colors focus-ring"
                 >
                   <Download className="w-4 h-4" />
                   Export Excel
@@ -676,7 +708,7 @@ function AdminDashboard() {
               </div>
 
               {/* Filters */}
-              <div className="glass rounded-xl p-4 flex flex-col lg:flex-row gap-4">
+              <div className="glass rounded-xl p-4 flex flex-col md:flex-row gap-4">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-500" />
                   <input
@@ -711,11 +743,11 @@ function AdminDashboard() {
                       <tr className="border-b border-dark-700">
                         <th className="text-left p-4 text-dark-400 font-medium">Customer</th>
                         <th className="text-left p-4 text-dark-400 font-medium">Mobile</th>
-                        <th className="text-left p-4 text-dark-400 font-medium hidden lg:table-cell">Branch</th>
-                        <th className="text-left p-4 text-dark-400 font-medium hidden lg:table-cell">Code</th>
-                        <th className="text-left p-4 text-dark-400 font-medium hidden lg:table-cell">Staff</th>
+                        <th className="text-left p-4 text-dark-400 font-medium hidden md:table-cell">Branch</th>
+                        <th className="text-left p-4 text-dark-400 font-medium hidden md:table-cell">Code</th>
+                        <th className="text-left p-4 text-dark-400 font-medium hidden md:table-cell">Staff</th>
                         <th className="text-left p-4 text-dark-400 font-medium">Status</th>
-                        <th className="text-left p-4 text-dark-400 font-medium hidden lg:table-cell">Date</th>
+                        <th className="text-left p-4 text-dark-400 font-medium hidden md:table-cell">Date</th>
                         <th className="p-4"></th>
                       </tr>
                     </thead>
@@ -725,15 +757,15 @@ function AdminDashboard() {
                           <td className="p-4">
                             <div>
                               <p className="font-medium">{coupon.customer_name}</p>
-                              <p className="text-sm text-dark-400 lg:hidden">{coupon.branch}</p>
+                              <p className="text-sm text-dark-400 md:hidden">{coupon.branch}</p>
                             </div>
                           </td>
                           <td className="p-4 text-dark-300">{coupon.mobile_number}</td>
-                          <td className="p-4 text-dark-300 hidden lg:table-cell">{coupon.branch}</td>
-                          <td className="p-4 hidden lg:table-cell">
+                          <td className="p-4 text-dark-300 hidden md:table-cell">{coupon.branch}</td>
+                          <td className="p-4 hidden md:table-cell">
                             <code className="text-brand-400 text-sm">{coupon.coupon_code}</code>
                           </td>
-                          <td className="p-4 text-dark-300 hidden lg:table-cell">{coupon.staff_name}</td>
+                          <td className="p-4 text-dark-300 hidden md:table-cell">{coupon.staff_name}</td>
                           <td className="p-4">
                             {coupon.whatsapp_sent ? (
                               <span className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-100 text-emerald-700 rounded-lg text-sm">
@@ -745,15 +777,16 @@ function AdminDashboard() {
                               </span>
                             )}
                           </td>
-                          <td className="p-4 text-dark-400 text-sm hidden lg:table-cell">
+                          <td className="p-4 text-dark-400 text-sm hidden md:table-cell">
                             {new Date(coupon.created_at).toLocaleString()}
                           </td>
                           <td className="p-4">
                             {!coupon.whatsapp_sent && (
                               <button
                                 onClick={() => handleResend(coupon.id)}
-                                className="p-2 hover:bg-dark-700 rounded-lg transition-colors"
+                                className="p-2 hover:bg-dark-700 rounded-lg transition-colors focus-ring"
                                 title="Resend WhatsApp"
+                                aria-label={`Resend WhatsApp for ${coupon.customer_name}`}
                               >
                                 <RefreshCw className="w-4 h-4 text-dark-400" />
                               </button>
@@ -790,6 +823,50 @@ function StaffManagement({ staff, onRefresh }) {
   const [showAddModal, setShowAddModal] = useState(false);
   const [newStaff, setNewStaff] = useState({ username: '', password: '', name: '', role: 'staff' });
   const [loading, setLoading] = useState(false);
+  const modalRef = useRef(null);
+
+  useEffect(() => {
+    if (!showAddModal) return;
+    const previousFocus = document.activeElement;
+    const modal = modalRef.current;
+    if (!modal) return;
+
+    const focusableSelectors = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+    const focusableElements = Array.from(modal.querySelectorAll(focusableSelectors))
+      .filter((el) => !el.hasAttribute('disabled'));
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setShowAddModal(false);
+        return;
+      }
+
+      if (event.key !== 'Tab' || focusableElements.length === 0) return;
+
+      if (event.shiftKey && document.activeElement === firstElement) {
+        event.preventDefault();
+        lastElement.focus();
+      } else if (!event.shiftKey && document.activeElement === lastElement) {
+        event.preventDefault();
+        firstElement.focus();
+      }
+    };
+
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', handleKeyDown);
+    if (firstElement) firstElement.focus();
+
+    return () => {
+      document.body.style.overflow = '';
+      document.removeEventListener('keydown', handleKeyDown);
+      if (previousFocus && previousFocus.focus) {
+        previousFocus.focus();
+      }
+    };
+  }, [showAddModal]);
 
   const handleAddStaff = async (e) => {
     e.preventDefault();
@@ -825,17 +902,18 @@ function StaffManagement({ staff, onRefresh }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="font-display text-2xl font-bold hidden lg:block">Staff Management</h2>
+        <h2 className="font-display text-2xl font-bold hidden md:block">Staff Management</h2>
         <button
           onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-brand-600 hover:bg-brand-700 rounded-xl transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-brand-600 hover:bg-brand-700 rounded-xl transition-colors focus-ring"
+          aria-haspopup="dialog"
         >
           <Plus className="w-4 h-4" />
           Add Staff
         </button>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2">
         {staff.map(member => (
           <div key={member.id} className="glass rounded-xl p-5">
             <div className="flex items-start justify-between">
@@ -863,7 +941,9 @@ function StaffManagement({ staff, onRefresh }) {
               </span>
               <button
                 onClick={() => handleToggleStatus(member.id)}
-                className="p-2 hover:bg-dark-700 rounded-lg transition-colors"
+                className="p-2 hover:bg-dark-700 rounded-lg transition-colors focus-ring"
+                aria-label={`Set ${member.name} ${member.active ? 'inactive' : 'active'}`}
+                aria-pressed={member.active}
               >
                 {member.active ? (
                   <ToggleRight className="w-6 h-6 text-emerald-600" />
@@ -879,18 +959,29 @@ function StaffManagement({ staff, onRefresh }) {
       {/* Add Staff Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
-          <div className="glass rounded-2xl p-6 w-full max-w-md animate-bounce-in">
+          <div
+            ref={modalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="add-staff-title"
+            className="glass rounded-2xl p-6 w-full max-w-md animate-bounce-in"
+          >
             <div className="flex items-center justify-between mb-6">
-              <h3 className="font-display text-xl font-bold">Add Staff Member</h3>
-              <button onClick={() => setShowAddModal(false)} className="p-2 hover:bg-dark-700 rounded-lg">
+              <h3 id="add-staff-title" className="font-display text-xl font-bold">Add Staff Member</h3>
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="p-2 hover:bg-dark-700 rounded-lg focus-ring"
+                aria-label="Close add staff dialog"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
             
             <form onSubmit={handleAddStaff} className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-dark-300">Full Name</label>
+                <label htmlFor="staff-name" className="text-sm font-medium text-dark-300">Full Name</label>
                 <input
+                  id="staff-name"
                   type="text"
                   value={newStaff.name}
                   onChange={(e) => setNewStaff(prev => ({ ...prev, name: e.target.value }))}
@@ -899,8 +990,9 @@ function StaffManagement({ staff, onRefresh }) {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium text-dark-300">Username</label>
+                <label htmlFor="staff-username" className="text-sm font-medium text-dark-300">Username</label>
                 <input
+                  id="staff-username"
                   type="text"
                   value={newStaff.username}
                   onChange={(e) => setNewStaff(prev => ({ ...prev, username: e.target.value.toLowerCase() }))}
@@ -909,8 +1001,9 @@ function StaffManagement({ staff, onRefresh }) {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium text-dark-300">Password</label>
+                <label htmlFor="staff-password" className="text-sm font-medium text-dark-300">Password</label>
                 <input
+                  id="staff-password"
                   type="text"
                   value={newStaff.password}
                   onChange={(e) => setNewStaff(prev => ({ ...prev, password: e.target.value }))}
@@ -919,8 +1012,9 @@ function StaffManagement({ staff, onRefresh }) {
                 />
               </div>
               <div>
-                <label className="text-sm font-medium text-dark-300">Role</label>
+                <label htmlFor="staff-role" className="text-sm font-medium text-dark-300">Role</label>
                 <select
+                  id="staff-role"
                   value={newStaff.role}
                   onChange={(e) => setNewStaff(prev => ({ ...prev, role: e.target.value }))}
                   className="w-full mt-1 bg-white/70 border border-dark-700 rounded-xl py-3 px-4 text-dark-900 focus:outline-none focus:border-brand-500"
@@ -934,14 +1028,14 @@ function StaffManagement({ staff, onRefresh }) {
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 py-3 rounded-xl border border-dark-600 hover:bg-dark-800 transition-colors"
+                  className="flex-1 py-3 rounded-xl border border-dark-600 hover:bg-dark-800 transition-colors focus-ring"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 py-3 rounded-xl bg-brand-600 hover:bg-brand-700 transition-colors disabled:opacity-50"
+                  className="flex-1 py-3 rounded-xl bg-brand-600 hover:bg-brand-700 transition-colors disabled:opacity-50 focus-ring"
                 >
                   {loading ? 'Adding...' : 'Add Staff'}
                 </button>

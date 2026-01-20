@@ -117,11 +117,21 @@ const generateCouponCode = () => {
   return `${prefix}-${timestamp}-${random}`;
 };
 
-const formatPhoneNumber = (phone) => {
+const normalizeOmanMobile = (phone) => {
   let cleaned = phone.replace(/\D/g, '');
+
+  if (cleaned.startsWith('00')) cleaned = cleaned.substring(2);
+  if (cleaned.startsWith('968')) cleaned = cleaned.substring(3);
   if (cleaned.startsWith('0')) cleaned = cleaned.substring(1);
-  if (!cleaned.startsWith('91')) cleaned = '91' + cleaned;
+
   return cleaned;
+};
+
+const isValidOmanMobile = (localNumber) => /^[79]\d{7}$/.test(localNumber);
+
+const formatPhoneNumber = (phone) => {
+  const local = normalizeOmanMobile(phone);
+  return `968${local}`;
 };
 
 const sendWhatsAppMessage = async (to, couponCode) => {
@@ -180,6 +190,11 @@ app.post('/api/coupons', authenticateToken, async (req, res) => {
   const { customer_name, mobile_number, branch } = req.body;
   if (!customer_name || !mobile_number || !branch) {
     return res.status(400).json({ error: 'All fields required' });
+  }
+
+  const localMobile = normalizeOmanMobile(mobile_number);
+  if (!isValidOmanMobile(localMobile)) {
+    return res.status(400).json({ error: 'Invalid Oman mobile number' });
   }
 
   const couponCode = generateCouponCode();
