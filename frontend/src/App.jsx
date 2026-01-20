@@ -6,6 +6,7 @@ import {
   Smartphone, User, Building, Send, Eye, EyeOff, Plus,
   Calendar, Filter, ArrowLeft, Settings, Lock, ToggleLeft, ToggleRight
 } from 'lucide-react';
+import bellaLogo from './assets/bella_logo.webp';
 
 // API Configuration
 const API_URL = import.meta.env.VITE_API_URL || '';
@@ -142,10 +143,10 @@ function LoginScreen() {
       <div className="w-full max-w-md animate-bounce-in">
         {/* Logo Section */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 mb-4 glow">
-            <Ticket className="w-10 h-10 text-white" />
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-white/10 border border-white/10 mb-4 glow">
+            <img src={bellaLogo} alt="IDF EXPO 2026 logo" className="w-14 h-14 object-contain" />
           </div>
-          <h1 className="font-display text-3xl font-bold gradient-text">Expo Coupons</h1>
+          <h1 className="font-display text-3xl font-bold gradient-text">IDF EXPO 2026</h1>
           <p className="text-dark-400 mt-2">Sign in to continue</p>
         </div>
 
@@ -205,7 +206,7 @@ function LoginScreen() {
         </form>
 
         <p className="text-center text-dark-500 text-sm mt-6">
-          Expo Coupon Distribution System
+          IDF EXPO 2026 Coupon Distribution System
         </p>
       </div>
     </div>
@@ -294,11 +295,11 @@ function EntryForm() {
       {/* Header */}
       <header className="glass sticky top-0 z-10 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center">
-            <Ticket className="w-5 h-5 text-white" />
+          <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center">
+            <img src={bellaLogo} alt="IDF EXPO 2026 logo" className="w-8 h-8 object-contain" />
           </div>
           <div>
-            <h1 className="font-display font-bold text-lg">Expo Coupons</h1>
+            <h1 className="font-display font-bold text-lg">IDF EXPO 2026</h1>
             <p className="text-xs text-dark-400">Hi, {user.name}</p>
           </div>
         </div>
@@ -552,12 +553,12 @@ function AdminDashboard() {
       <aside className={`fixed inset-y-0 left-0 w-64 glass z-50 transform transition-transform duration-300 lg:translate-x-0 ${menuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="p-4 border-b border-dark-700">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center">
-              <Ticket className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center">
+              <img src={bellaLogo} alt="IDF EXPO 2026 logo" className="w-8 h-8 object-contain" />
             </div>
             <div>
-              <h1 className="font-display font-bold">Admin Panel</h1>
-              <p className="text-xs text-dark-400">{user.name}</p>
+              <h1 className="font-display font-bold">IDF EXPO 2026</h1>
+              <p className="text-xs text-dark-400">Admin Panel - {user.name}</p>
             </div>
           </div>
         </div>
